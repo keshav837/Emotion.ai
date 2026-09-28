@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#080b16" />
+<title>EmotionAI — Facial Expression Analysis</title>
+<style>
+:root{--bg:#080b16;--panel:#101629;--panel2:#131b32;--line:#25304d;--text:#eef2ff;--muted:#96a2c2;--purple:#9875ff;--blue:#58a6ff;--green:#57d9ad;--red:#ff6e88;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% -10%,#201747 0,transparent 40%),radial-gradient(ellipse at 90% 10%,#0c2a50 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,select{font:inherit}button{cursor:pointer;border:0}a{color:inherit;text-decoration:none}
+header{height:76px;border-bottom:1px solid #ffffff12;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,5vw,72px);position:sticky;top:0;background:#080b16d9;backdrop-filter:blur(16px);z-index:10}
+.brand{display:flex;align-items:center;gap:11px;font-size:18px;font-weight:800;letter-spacing:-.4px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--blue));display:grid;place-items:center;color:white;font-weight:900;box-shadow:0 0 28px #9875ff40}
+nav{display:flex;gap:7px}nav button{background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px}nav button.active,nav button:hover{color:white;background:#ffffff0d}
+main{max-width:1440px;margin:auto;padding:32px clamp(16px,4vw,56px) 60px}.page{display:none}.page.active{display:block}
+.eyebrow{color:#b6a3ff;font-size:12px;text-transform:uppercase;letter-spacing:1.8px;font-weight:800}.hero{padding:52px 0 34px;max-width:900px}.hero h1{font-size:clamp(38px,6vw,72px);line-height:1.02;letter-spacing:-2.8px;margin:16px 0}.gradient{background:linear-gradient(100deg,#b9a5ff,#74c5ff);color:transparent;background-clip:text}.hero p{max-width:710px;color:var(--muted);font-size:18px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+.btn{border-radius:11px;padding:11px 17px;font-weight:750;transition:.18s}.btn:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradient(110deg,#8967ef,#4f8fe8);color:white;box-shadow:0 8px 26px #7054db30}.primary:hover{filter:brightness(1.1);transform:translateY(-1px)}.secondary{background:#ffffff0b;border:1px solid var(--line);color:var(--text)}.danger{background:#5a2235;color:#ffdce3;border:1px solid #85384f}.features{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 30px}.feature,.card{background:linear-gradient(145deg,#11182b,#0e1425);border:1px solid #ffffff12;border-radius:var(--radius);padding:20px}.feature .icon{font-size:24px}.feature h3{margin:12px 0 6px;font-size:16px}.feature p,.muted{color:var(--muted);margin:0;font-size:13px}.disclaimer{border:1px solid #8b72df45;background:#8b72df0b;border-radius:13px;padding:15px 18px;color:#c7cce0;font-size:13px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:8px 0 24px}.pagehead h1{font-size:clamp(28px,4vw,42px);margin:7px 0;letter-spacing:-1.4px}.livegrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.cardhead h2{font-size:16px;margin:0}.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#64708c;display:inline-block}.dot.green{background:var(--green);box-shadow:0 0 12px #57d9ad70}.video-wrap{position:relative;aspect-ratio:16/10;background:#050812;border:1px solid #ffffff12;border-radius:14px;overflow:hidden;display:grid;place-items:center}.video-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:none}.video-wrap video.on{display:block}.camera-placeholder{text-align:center;padding:22px;color:var(--muted)}.camera-placeholder .camicon{font-size:42px;margin-bottom:10px}.overlay{position:absolute;left:12px;top:12px;background:#080b16c9;border:1px solid #ffffff1b;padding:6px 10px;border-radius:99px;font-size:11px;color:#d7dcf1}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.controls .btn{padding:9px 13px;font-size:13px}.select{background:#0c1223;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 10px;max-width:100%}.camera-row{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}.camera-row label{font-size:12px;color:var(--muted)}
+.expr-card{display:flex;align-items:center;gap:18px;padding:20px;border-radius:15px;background:linear-gradient(130deg,#6f4fc51d,#3387d31a);border:1px solid #9e87ff30}.face-emoji{font-size:43px}.expr-label{font-size:28px;font-weight:800;letter-spacing:-.8px}.confidence{color:#b4c1dd;font-size:13px}.confidence strong{color:#fff}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:#ffffff0b;color:#aebbd6;border:1px solid #ffffff12}
+.prob-list{display:grid;gap:11px;margin-top:18px}.prob-row{display:grid;grid-template-columns:90px 1fr 48px;gap:10px;align-items:center;font-size:12px}.bar{height:8px;background:#252e48;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:99px;transition:width .25s}.prob-val{text-align:right;color:#c6d0e8;font-variant-numeric:tabular-nums}
+.bottomgrid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:18px}.chartbox{height:220px;position:relative}.chartbox svg{width:100%;height:100%;overflow:visible}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.stat{padding:17px;background:#0c1222;border:1px solid #ffffff0e;border-radius:14px}.stat label{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:25px;letter-spacing:-.8px;margin-top:8px}.stat small{color:#9eacd0;font-size:11px}
+.tablewrap{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:430px}th,td{text-align:left;padding:12px;border-bottom:1px solid #ffffff0c;font-size:13px}th{color:var(--muted);font-weight:600}td{color:#d9e1f5}.empty{text-align:center;color:var(--muted);padding:28px}
+.contentgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.contentgrid .card h2{margin:0 0 10px;font-size:18px}.contentgrid p,.contentgrid li{color:var(--muted);font-size:14px}.contentgrid ul{padding-left:19px}.tag{display:inline-block;font-size:11px;border:1px solid #ffffff17;color:#c9d3eb;padding:5px 9px;border-radius:99px;margin:4px 4px 0 0}
+footer{border-top:1px solid #ffffff10;color:#7683a4;padding:22px clamp(18px,5vw,72px);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#202a43;border:1px solid #ffffff25;padding:12px 17px;border-radius:12px;z-index:30;display:none;max-width:90vw;font-size:13px}.toast.show{display:block}
+@media(max-width:1000px){.features{grid-template-columns:repeat(2,1fr)}.livegrid{grid-template-columns:1fr}.bottomgrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){header{height:auto;min-height:68px;padding:12px 16px;align-items:flex-start;gap:10px;flex-direction:column}nav{width:100%;overflow:auto}nav button{white-space:nowrap;padding:8px 11px;font-size:12px}.hero{padding:34px 0 24px}.hero h1{letter-spacing:-1.6px}.hero p{font-size:16px}.features{grid-template-columns:1fr 1fr}.feature{padding:15px}.pagehead{align-items:flex-start;flex-direction:column}.contentgrid{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:21px}.prob-row{grid-template-columns:78px 1fr 42px}.card{padding:15px}main{padding-top:22px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#" data-page="home"><span class="logo">E</span> EmotionAI</a>
+  <nav aria-label="Main navigation">
+    <button class="active" data-page="home">Home</button><button data-page="live">Live Analysis</button><button data-page="model">About Model</button><button data-page="privacy">Privacy</button>
+  </nav>
+</header>
+<main>
+<section id="home" class="page active">
+  <div class="hero">
+    <div class="eyebrow">Computer vision · Browser-based ML</div>
+    <h1>See the expression.<br><span class="gradient">Understand the model.</span></h1>
+    <p>Explore real-time facial-expression classification using your camera and a pretrained model that runs in your browser. Predictions describe visible expression patterns—not a person's true feelings.</p>
+    <div class="actions"><button class="btn primary" data-page="live">Start Analysis ↗</button><button class="btn secondary" data-page="model">Explore the model</button></div>
+  </div>
+  <div class="features">
+    <article class="feature"><div class="icon">◉</div><h3>Live camera</h3><p>Start, pause, resume, switch, or stop your camera at any time.</p></article>
+    <article class="feature"><div class="icon">⌁</div><h3>Real model inference</h3><p>Facial-expression scores come from a pretrained neural network—not generated sample values.</p></article>
+    <article class="feature"><div class="icon">▥</div><h3>Session analytics</h3><p>Review actual predictions, confidence scores, history, and export a CSV.</p></article>
+    <article class="feature"><div class="icon">♧</div><h3>Privacy-first design</h3><p>Camera frames are processed in your browser. No recording or audio capture.</p></article>
+  </div>
+  <div class="disclaimer"><strong>Important:</strong> Facial expressions cannot reliably reveal someone's internal emotions, intent, personality, or truth. This project is for learning and experimentation, not diagnosis or decisions about people.</div>
+</section>
+
+<section id="live" class="page">
+  <div class="pagehead"><div><div class="eyebrow">Live workspace</div><h1>Expression analysis</h1><p class="muted">Camera frames are processed locally in this browser. Start the camera to begin.</p></div><span class="pill" id="modelBadge">Model: Not loaded</span></div>
+  <div class="livegrid">
+    <article class="card">
+      <div class="cardhead"><h2>Camera feed</h2><span class="status"><i class="dot" id="cameraDot"></i><span id="cameraStatus">Camera off</span></span></div>
+      <div class="video-wrap"><video id="video" autoplay muted playsinline></video><div class="camera-placeholder" id="placeholder"><div class="camicon">▣</div><strong>Camera is off</strong><p class="muted">Start camera to begin local analysis.</p></div><div class="overlay" id="faceBadge">Waiting for camera</div></div>
+      <div class="camera-row"><label for="cameraSelect">Camera</label><select id="cameraSelect" class="select"><option value="">Default camera</option></select></div>
+      <div class="controls">
+        <button class="btn primary" id="startBtn">Start Camera</button>
+        <button class="btn secondary" id="pauseBtn" disabled>Pause Analysis</button>
+        <button class="btn secondary" id="resumeBtn" disabled>Resume</button>
+        <button class="btn danger" id="stopBtn" disabled>Stop Camera</button>
+      </div>
+      <div class="muted" id="errorMsg" role="status" style="margin-top:13px"></div>
+    </article>
+    <article class="card">
+      <div class="cardhead"><h2>Current model prediction</h2><span class="pill">MODEL OUTPUT</span></div>
+      <div class="expr-card"><div class="face-emoji" id="exprEmoji">◌</div><div><div class="expr-label" id="exprLabel">—</div><div class="confidence" id="confidence">Waiting for a face</div></div></div>
+      <div class="cardhead" style="margin:22px 0 0"><h2>Class probabilities</h2><span class="muted">Model scores</span></div>
+      <div class="prob-list" id="probList"></div>
+    </article>
+  </div>
+  <div class="bottomgrid">
+    <article class="card"><div class="cardhead"><h2>Prediction timeline</h2><span class="muted">Actual inference events</span></div><div class="chartbox" id="timeline"><div class="empty">Timeline will appear after a valid prediction.</div></div></article>
+    <article class="card"><div class="cardhead"><h2>Prediction distribution</h2><span class="muted">Session share</span></div><div class="chartbox" id="distribution"><div class="empty">No predictions yet.</div></div></article>
+  </div>
+  <div class="stats">
+    <div class="stat"><label>Analysis duration</label><strong id="duration">00:00</strong><small>Current session</small></div>
+    <div class="stat"><label>Face detections</label><strong id="detections">0</strong><small>Successful single-face checks</small></div>
+    <div class="stat"><label>Most frequent</label><strong id="mostCommon">—</strong><small>Based on model outputs</small></div>
+    <div class="stat"><label>Inference rate</label><strong id="fps">—</strong><small>Approx. predictions / second</small></div>
+  </div>
+  <article class="card" style="margin-top:18px">
+    <div class="cardhead"><div><h2>Expression history</h2><p class="muted">Actual prediction events from this session</p></div><div class="actions" style="margin:0"><button class="btn secondary" id="csvBtn">Export CSV</button><button class="btn secondary" id="resetBtn">Reset session</button></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Time</th><th>Predicted expression</th><th>Confidence</th></tr></thead><tbody id="history"><tr><td class="empty" colspan="3">No predictions yet.</td></tr></tbody></table></div>
+  </article>
+  <p class="muted" style="margin-top:16px">Predictions are model classifications of visible facial patterns and are not a reliable measure of actual emotional state.</p>
+</section>
+
+<section id="model" class="page">
+  <div class="pagehead"><div><div class="eyebrow">Technical notes</div><h1>About the model</h1><p class="muted">What runs, what it outputs, and where it can fail.</p></div></div>
+  <div class="contentgrid">
+    <article class="card"><h2>Model used</h2><p>This app uses <strong>face-api.js</strong> with its Tiny Face Detector and Face Expression Recognition neural network. The library provides seven expression classes: happy, sad, angry, fearful, disgusted, surprised, and neutral.</p><p>Model weights are loaded from the face-api.js project's public weights directory. The app reports a model-loading error if those files cannot be reached. No prediction is generated when the model is unavailable.</p><p><span class="tag">TensorFlow.js</span><span class="tag">Tiny Face Detector</span><span class="tag">7 expression labels</span><span class="tag">Browser inference</span></p></article>
+    <article class="card"><h2>Inference pipeline</h2><ul><li>Request camera permission and display the live video.</li><li>Run face detection on a throttled interval.</li><li>Only continue when exactly one face is detected.</li><li>Run the expression model and read its seven output scores.</li><li>Update charts and history using actual results.</li></ul></article>
+    <article class="card"><h2>Dataset and training</h2><p>This app uses pretrained public model weights. The app does not train a model in your browser and does not independently verify the original training dataset or its evaluation metrics. FER-2013 is a commonly used facial-expression research dataset, but this app does not claim its deployed weights were trained or tested on FER-2013.</p></article>
+    <article class="card"><h2>Limitations</h2><ul><li>Lighting, camera quality, face angle, and occlusion can affect outputs.</li><li>Model performance can vary across people and settings.</li><li>Facial expressions are ambiguous and context-dependent.</li><li>A probability score is not a calibrated measure of emotional certainty.</li><li>Do not use results for diagnosis, hiring, discipline, surveillance, or decisions about a person.</li></ul></article>
+  </div>
+</section>
+
+<section id="privacy" class="page">
+  <div class="pagehead"><div><div class="eyebrow">Your data</div><h1>Privacy by design</h1><p class="muted">You control camera access and can stop it whenever you want.</p></div></div>
+  <div class="contentgrid">
+    <article class="card"><h2>Camera permission</h2><p>Your browser asks for permission before the camera starts. You can revoke permission in your browser settings. Camera access requires a secure context such as HTTPS or localhost.</p></article>
+    <article class="card"><h2>Local processing</h2><p>Video frames are sent to the in-browser face detector and expression model. This page does not upload camera frames to an application server, record video, or capture audio. Model library and weight files are fetched from a public CDN/repository when needed.</p></article>
+    <article class="card"><h2>Session history</h2><p>Prediction history and session statistics are kept in page memory while the page is open. They are not sent to a database. Use Export CSV if you choose to save your session, or Reset session to clear the in-page results.</p></article>
+    <article class="card"><h2>Stop anytime</h2><p>Select <strong>Stop Camera</strong> to stop the camera tracks and end analysis. Closing or refreshing the page also ends the camera session. The browser's camera indicator helps show when the camera is active.</p><button class="btn secondary" data-page="live" style="margin-top:8px">Go to Live Analysis</button></article>
+  </div>
+</section>
+</main>
+<footer><span>© EmotionAI · Learning project</span><span>Facial expression predictions ≠ actual emotions.</span></footer>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const labels = ["happy","sad","angry","surprised","fearful","disgusted","neutral"];
+  const emojis = {happy:"☺",sad:"☹",angry:"😠",surprised:"😮",fearful:"😨",disgusted:"😖",neutral:"😐"};
+  const modelBase = "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights";
+  let stream=null, running=false, paused=false, raf=null, lastInference=0, modelReady=false, startAt=null, elapsedBefore=0, timerId=null, inferenceTimes=[], history=[], detectionCount=0, busy=false, currentCamera="";
+  const navButtons = [...document.querySelectorAll("[data-page]")];
+  function go(page){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));if(page==="live") drawAll();}
+  navButtons.forEach(b=>b.addEventListener("click",e=>{e.preventDefault();go(b.dataset.page)}));
+  function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3500)}
+  function setError(s){$("errorMsg").textContent=s||""}
+  function setModel(status){$("modelBadge").textContent="Model: "+status;$("modelBadge").style.color=status==="Ready"?"#70e2bd":status==="Error"?"#ff8ba0":"#b9c3df"}
+  function buildProb(){ $("probList").innerHTML=labels.map(l=>`<div class="prob-row"><span>${cap(l)}</span><div class="bar"><span id="bar-${l}"></span></div><span class="prob-val" id="val-${l}">—</span></div>`).join(""); }
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  buildProb();
+  function updateProb(obj){labels.forEach(l=>{const v=Number(obj[l]||0);$("bar-"+l).style.width=(v*100).toFixed(1)+"%";$("val-"+l).textContent=(v*100).toFixed(1)+"%"});}
+  function clearCurrent(msg="Waiting for a face"){ $("exprEmoji").textContent="◌";$("exprLabel").textContent="—";$("confidence").textContent=msg;updateProb({});}
+  async function loadModels(){
+    if(modelReady)return true;
+    if(!window.faceapi){setModel("Error");throw new Error("The face-api.js library could not load. Check your internet connection and reload.");}
+    setModel("Loading…");
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(modelBase),
+      faceapi.nets.faceExpressionNet.loadFromUri(modelBase)
+    ]);
+    modelReady=true;setModel("Ready");return true;
+  }
+  async function refreshCameras(){
+    if(!navigator.mediaDevices?.enumerateDevices)return;
+    const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    const sel=$("cameraSelect"), old=sel.value;
+    sel.innerHTML='<option value="">Default camera</option>';
+    devices.forEach((d,i)=>{const o=document.createElement("option");o.value=d.deviceId;o.textContent=d.label||`Camera ${i+1}`;sel.appendChild(o)});
+    if(devices.some(d=>d.deviceId===old))sel.value=old;
+  }
+  async function startCamera(){
+    setError("");
+    if(!navigator.mediaDevices?.getUserMedia){setError("Camera access is not supported here. Open this page in a modern browser over HTTPS or localhost.");return}
+    $("startBtn").disabled=true;
+    try{
+      await loadModels();
+      const deviceId=$("cameraSelect").value;
+      const constraints={audio:false,video:deviceId?{deviceId:{exact:deviceId},width:{ideal:960},height:{ideal:600}}:{facingMode:"user",width:{ideal:960},height:{ideal:600}}};
+      stream=await navigator.mediaDevices.getUserMedia(constraints);
+      $("video").srcObject=stream;await $("video").play();
+      $("video").classList.add("on");$("placeholder").style.display="none";
+      running=true;paused=false;startAt=Date.now();currentCamera=deviceId;
+      $("cameraStatus").textContent="Camera active";$("cameraDot").classList.add("green");
+      $("faceBadge").textContent="Searching for face…";
+      $("startBtn").disabled=true;$("pauseBtn").disabled=false;$("resumeBtn").disabled=true;$("stopBtn").disabled=false;
+      await refreshCameras();if(deviceId)$("cameraSelect").value=deviceId;
+      startTimer();loop();toast("Camera started. Keep one face visible in frame.");
+    }catch(e){
+      const name=e?.name||"";
+      if(name==="NotAllowedError"||name==="PermissionDeniedError")setError("Camera permission was denied. Allow camera access in your browser settings, then try again.");
+      else if(name==="NotFoundError"||name==="DevicesNotFoundError")setError("No camera was found. Connect a camera and try again.");
+      else if(name==="NotReadableError")setError("The camera is busy in another app. Close other camera apps and try again.");
+      else setError(e?.message||"Could not start camera. Check your browser permissions and try again.");
+      setModel(modelReady?"Ready":"Error");
+    }finally{$("startBtn").disabled=!!stream}
+  }
+  async function switchCamera(){
+    if(!running)return;
+    const wanted=$("cameraSelect").value;
+    if(wanted===currentCamera)return;
+    await stopCamera(false);
+    $("cameraSelect").value=wanted;
+    await startCamera();
+  }
+  function pause(){if(!running||paused)return;paused=true;elapsedBefore+=Date.now()-startAt;startAt=null;if(raf)cancelAnimationFrame(raf);raf=null;$("pauseBtn").disabled=true;$("resumeBtn").disabled=false;$("cameraStatus").textContent="Paused";$("faceBadge").textContent="Analysis paused";updateDuration();if(timerId){clearInterval(timerId);timerId=null}}
+  function resume(){if(!running||!paused)return;paused=false;startAt=Date.now();$("pauseBtn").disabled=false;$("resumeBtn").disabled=true;$("cameraStatus").textContent="Camera active";startTimer();loop()}
+  async function stopCamera(reset=false){
+    running=false;paused=false;if(raf)cancelAnimationFrame(raf);raf=null;if(timerId){clearInterval(timerId);timerId=null}
+    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+    $("video").srcObject=null;$("video").classList.remove("on");$("placeholder").style.display="grid";
+    $("cameraStatus").textContent="Camera off";$("cameraDot").classList.remove("green");$("faceBadge").textContent="Camera stopped";
+    $("startBtn").disabled=false;$("pauseBtn").disabled=true;$("resumeBtn").disabled=true;$("stopBtn").disabled=true;
+    startAt=null;elapsedBefore=0;updateDuration();clearCurrent("Camera stopped");
+    if(reset)resetSession();
+  }
+  function startTimer(){if(timerId)clearInterval(timerId);timerId=setInterval(updateDuration,1000);updateDuration()}
+  function updateDuration(){let ms=elapsedBefore+(startAt?Date.now()-startAt:0);const s=Math.floor(ms/1000);$("duration").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+  async function loop(){
+    if(!running||paused||busy)return;
+    raf=requestAnimationFrame(loop);
+    const now=performance.now();if(now-lastInference<550)return;
+    if(!$("video").videoWidth||$("video").readyState<2)return;
+    lastInference=now;busy=true;
+    try{
+      const results=await faceapi.detectAllFaces($("video"),new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:.45})).withFaceExpressions();
+      if(!running||paused)return;
+      if(results.length===0){$("faceBadge").textContent="No face detected";clearCurrent("No face detected");}
+      else if(results.length>1){$("faceBadge").textContent=`${results.length} faces detected`;clearCurrent("Multiple faces detected — show one face");}
+      else{
+        const r=results[0];detectionCount++;$("detections").textContent=detectionCount;$("faceBadge").textContent="Face detected";
+        const ex=r.expressions;let top=labels.reduce((a,b)=>ex[a]>=ex[b]?a:b);
+        const conf=Number(ex[top]||0);$("exprEmoji").textContent=emojis[top]||"◉";$("exprLabel").textContent=cap(top);
+        $("confidence").innerHTML=`Model score: <strong>${(conf*100).toFixed(1)}%</strong>${conf<.35?' · Low-confidence prediction':''}`;
+        updateProb(ex);
+        const entry={timestamp:new Date().toISOString(),time:new Date().toLocaleTimeString(),expression:top,confidence:conf,values:{...ex}};
+        history.push(entry);if(history.length>500)history.shift();
+        inferenceTimes.push(performance.now());inferenceTimes=inferenceTimes.filter(t=>performance.now()-t<10000);
+        $("fps").textContent=inferenceTimes.length?((inferenceTimes.length/Math.max(1,(inferenceTimes[inferenceTimes.length-1]-inferenceTimes[0])/1000)).toFixed(1)):"—";
+        renderHistory();drawAll();
+      }
+    }catch(e){setError("Inference error: "+(e?.message||"Could not process this frame."));}
+    finally{busy=false;}
+  }
+  function counts(){const c=Object.fromEntries(labels.map(l=>[l,0]));history.forEach(h=>c[h.expression]++);return c}
+  function renderHistory(){const body=$("history");if(!history.length){body.innerHTML='<tr><td class="empty" colspan="3">No predictions yet.</td></tr>';return}
+    body.innerHTML=history.slice(-40).reverse().map(h=>`<tr><td>${h.time}</td><td>${cap(h.expression)}</td><td>${(h.confidence*100).toFixed(1)}%</td></tr>`).join("");
+    const c=counts();const top=labels.reduce((a,b)=>c[a]>=c[b]?a:b);$("mostCommon").textContent=history.length?cap(top):"—";
+  }
+  function drawAll(){drawTimeline();drawDistribution()}
+  function drawTimeline(){
+    const box=$("timeline");if(!history.length){box.innerHTML='<div class="empty">Timeline will appear after a valid prediction.</div>';return}
+    const data=history.slice(-45), w=700,h=220,pad={l:36,r:12,t:14,b:35}, cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+    const ys=Object.fromEntries(labels.map((l,i)=>[l,pad.t+i*(ch/Math.max(1,labels.length-1))]));
+    const points=data.map((d,i)=>`${pad.l+(data.length===1?cw/2:i*cw/(data.length-1))},${ys[d.expression]}`).join(" ");
+    const grid=labels.map(l=>`<line x1="${pad.l}" y1="${ys[l]}" x2="${w-pad.r}" y2="${ys[l]}" stroke="#27314b" stroke-dasharray="3 5"/><text x="${pad.l-8}" y="${ys[l]+4}" fill="#94a1c1" font-size="11" text-anchor="end">${cap(l)}</text>`).join("");
+    const dots=data.map((d,i)=>`<circle cx="${pad.l+(data.length===1?cw/2:i*cw/(data.length-1))}" cy="${ys[d.expression]}" r="3.5" fill="#a38aff"/>`).join("");
+    box.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Timeline of model prediction labels">${grid}<polyline points="${points}" fill="none" stroke="#9875ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}<text x="${pad.l}" y="${h-8}" fill="#94a1c1" font-size="10">${data[0].time||""}</text><text x="${w-pad.r}" y="${h-8}" fill="#94a1c1" font-size="10" text-anchor="end">${data[data.length-1].time||""}</text></svg>`;
+  }
+  function drawDistribution(){
+    const box=$("distribution");if(!history.length){box.innerHTML='<div class="empty">No predictions yet.</div>';return}
+    const c=counts(),total=history.length,w=600,h=220,pad={l:92,r:45,t:12,b:8},row=27,barW=w-pad.l-pad.r;
+    box.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Distribution of predicted expression labels">${labels.map((l,i)=>{const y=pad.t+i*row, pct=c[l]/total*100;return `<text x="${pad.l-10}" y="${y+14}" fill="#b7c3de" font-size="12" text-anchor="end">${cap(l)}</text><rect x="${pad.l}" y="${y}" width="${barW}" height="11" rx="5" fill="#252e48"/><rect x="${pad.l}" y="${y}" width="${barW*pct/100}" height="11" rx="5" fill="url(#grad)"/><text x="${w-pad.r+8}" y="${y+10}" fill="#d6def2" font-size="11">${pct.toFixed(0)}%</text>`}).join("")}<defs><linearGradient id="grad"><stop stop-color="#9875ff"/><stop offset="1" stop-color="#58a6ff"/></linearGradient></defs></svg>`;
+  }
+  function resetSession(){history=[];detectionCount=0;inferenceTimes=[];$("detections").textContent="0";$("mostCommon").textContent="—";$("fps").textContent="—";$("history").innerHTML='<tr><td class="empty" colspan="3">No predictions yet.</td></tr>';drawAll();clearCurrent();toast("Session statistics cleared.")}
+  function exportCSV(){if(!history.length){toast("No predictions to export yet.");return}
+    const rows=[["timestamp","expression","confidence"],...history.map(h=>[h.timestamp,h.expression,h.confidence])];
+    const csv=rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="emotionai-session.csv";a.click();URL.revokeObjectURL(url);
+  }
+  $("startBtn").addEventListener("click",startCamera);$("stopBtn").addEventListener("click",()=>stopCamera());$("pauseBtn").addEventListener("click",pause);$("resumeBtn").addEventListener("click",resume);
+  $("cameraSelect").addEventListener("change",switchCamera);$("csvBtn").addEventListener("click",exportCSV);$("resetBtn").addEventListener("click",resetSession);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden&&running&&!paused)pause()});
+  window.addEventListener("pagehide",()=>{if(stream)stream.getTracks().forEach(t=>t.stop())});
+  if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener("devicechange",refreshCameras);
+  refreshCameras().catch(()=>{});
+})();
+</script>
+</body>
+</html>
